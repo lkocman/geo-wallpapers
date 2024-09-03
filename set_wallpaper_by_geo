@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# This script is expected to be executed on each startup
+# In the end it would probably be nice to set a user symlink to the wallpaper
+# any dynamic changing in /usr would not work on immutable systems anyway
+
+# Get the current timezone offset using the date command
+current_offset=$(date +%z)
+
+wallpaper_dir="file:///usr/share/wallpapers/geo-wallpapers"
+if [ -d ".git" ]; then
+	scriptdir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd );
+	wallpaper_dir="file://$scriptdir/png"
+fi
+
+# Declare an associative array with timezone as keys and wallpaper paths as values
+declare -A timezones_wallpapers=(
+    ["Indian/Mauritius"]="$wallpaper_dir/lemorne.png"
+    ["Asia/Taipei"]="$wallpaper_dir/taipei.png"
+    # Add more timezones with their respective wallpaper paths
+)
+
+function get_utc_offset() {
+    local timezone=$1
+    echo $(TZ=$timezone date +%z)
+}
+
+closest_timezone=""
+closest_wallpaper=""
+min_offset_diff=99999  # A large initial value
+
+# Convert offset to an integer value for comparison
+current_offset_hours=$(echo $current_offset | sed 's/^+//;s/^0*//')
+
+for timezone in "${!timezones_wallpapers[@]}"; do
+    place_offset=$(get_utc_offset "$timezone")
+    place_offset_hours=$(echo $place_offset | sed 's/^+//;s/^0*//')
+
+    # The absolute difference between current and place offset
+    offset_diff=$(( current_offset_hours - place_offset_hours ))
+    offset_diff=${offset_diff#-}  # Absolute value
+
+    # Check if this is the smallest difference
+    if (( offset_diff < min_offset_diff )); then
+        min_offset_diff=$offset_diff
+        closest_timezone=$timezone
+        closest_wallpaper=${timezones_wallpapers[$timezone]}
+    fi
+done
+
+#echo "The closest timezone to the current timezone offset ($current_offset) is: $closest_timezone"
+echo "The corresponding wallpaper file is: $closest_wallpaper"
+gsettings set org.gnome.desktop.background picture-uri $closest_wallpaper
+gsettings set org.gnome.desktop.background picture-uri-dark $closest_wallpaper
