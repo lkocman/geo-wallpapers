@@ -1,6 +1,6 @@
 # geo-wallpapers
-experiment with geo-based wallpapers for Leap
-Originally reported here https://github.com/openSUSE/branding/issues/159
+experiment with geo-based wallpapers for openSUSE
+Originally reported as https://github.com/openSUSE/branding/issues/159
 
 
 ```
