@@ -48,6 +48,7 @@ for timezone in "${!timezones_wallpapers[@]}"; do
     fi
 done
 
+# Best would be to choose day/night for dark/light scheme ... not sure if we'll have enough time to do all variants :-)
 #echo "The closest timezone to the current timezone offset ($current_offset) is: $closest_timezone"
 echo "The corresponding wallpaper file is: $closest_wallpaper"
 gsettings set org.gnome.desktop.background picture-uri $closest_wallpaper
